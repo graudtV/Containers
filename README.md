@@ -1,2 +1,2 @@
 # Containers
- Realization of standart containers on pure C
+Пробую реализовать list, stack, map на чистом C без всяких этих ваших там шаблонов

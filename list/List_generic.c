@@ -8,12 +8,28 @@ List *_newCustomList(size_t dataSize, void (*cpyFunc)(void *dst, const void *src
 	assert(cpyFunc != NULL);	
 	List *list = calloc(1, sizeof(List));
 	assert(list != NULL);
+	printf("New list %p size %zu\n", list, sizeof(List));
 	//Инициализация значениями
 	list->head = NULL;
 	list->data_sz = dataSize;
 	list->cpy = cpyFunc;
+	list->cmp = cmpFunc;
+	list->free = freeFunc;
 
 	return list;
+}
+
+void _listInit(List *list, size_t dataSize, void (*cpyFunc)(void *dst, const void *src),
+				void (*cmpFunc)(const void *arg1, const void *arg2), void (*freeFunc)(void *data) )
+{	//только для использования внутри библиотеки. Для создания List в программе нужно использовать newList()
+	assert(cpyFunc != NULL);	
+	printf("New list %p\n", list);
+	//Инициализация значениями
+	list->head = NULL;
+	list->data_sz = dataSize;
+	list->cpy = cpyFunc;
+	list->cmp = cmpFunc;
+	list->free = freeFunc;
 }
 
 void _listDestroy(List *list)
@@ -26,6 +42,7 @@ void _listDestroy(List *list)
 	list->free = NULL;
 
 	free(list); //!!!
+	printf("Freing list %p\n", list);
 }
 
 
@@ -34,8 +51,10 @@ void _listPushFront(List *list, void *data)
 {
 	assert(list != NULL);
 	assert(data != NULL);
+	assert(list->cpy != NULL);
 
 	void *node = calloc(1, sizeof(void *) + list->data_sz);
+	printf("New node %p size %zu\n", node, sizeof(void *) + list->data_sz);
 	assert(node != NULL);
 	//Инициализация нового элемента списка ("узла")
 	*((void **) node) = list->head; //в поле next новой головы записываем указатель на старую
@@ -54,7 +73,7 @@ void _listPopFront(List *list)
 	if (list->free != NULL) //Если пользователь задал функцию free, вызываем ее
 		list->free(list->head + sizeof(void *));
 	free(list->head);
-
+	printf("freeing node %p\n", list->head);
 	list->head = newHead;
 }
 
@@ -86,6 +105,7 @@ void _listClear(List *list)
 		if (list->free != NULL) //Если пользователь задал функцию free, вызываем ее
 			list->free(node + sizeof(void *)); //Освобождаем память, выделенную функцией list->cpy
 		free(node); //Освобождаем память под сам узел
+		printf("freeing node %p (_listClear)\n", list->head);
 		node = tempNode;
 	}
 	list->head = NULL;	

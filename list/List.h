@@ -6,11 +6,13 @@
 #define _LIST_H_
 
 #include "List_generic.h"
+#include "List_int.h"
 
 //Для удобной работы со списками разных типов определения функций приходится делать в виде макросов
 //init-destroy functions
 #define newCustomList(type, cpyF, cmpF, freeF) _newCustomList(sizeof(type), cpyF, cmpF, freeF); //"Конструктор" непосредственно для List (произвольного типа)
-#define listDestroy(plist) _Generic((plist), List *: _listDestroy(list))
+#define newList(type) _Generic(((type) 0), int: _newIntList())
+#define listDestroy(plist) _Generic((plist), List *: _listDestroy((List *) plist), ListInt*: _listIntDestroy((ListInt *) plist))
 
 //interface functions
 #define listPushFront(plist, pdata) _Generic((plist), List *: _listPushFront(plist, pdata))

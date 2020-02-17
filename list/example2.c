@@ -4,14 +4,11 @@
 void cpyStr(void *dst, const void *src)
 {
 	*(char **) dst = strdup((char *) src);
-	printf("new str '%s'", (char *) src);
-	printf("Allocated str %p, ptr written in %p\n", *(char **) dst, dst);
 }
 
-void freeStr(void *ppstr)
+void freeStr(void *str)
 {
-	free(*(char **) ppstr);
-	printf("Freing %p\n", *(char **) ppstr);
+	free(str);
 }
 
 void printStr(void *ppstr)
@@ -22,7 +19,7 @@ void printStr(void *ppstr)
 int main()
 {
 	List *list = newCustomList(char *, cpyStr, NULL, freeStr);
-	printf("List size = %zu\n", sizeof(List));
+
 	listPushFront(list, "abc\n");
 	listPushFront(list, "Hello, world!\n");
 	listPushFront(list, "Have a nice day!\n");

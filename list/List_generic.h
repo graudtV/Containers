@@ -15,19 +15,19 @@ typedef struct
 	void (*cpy)(void *dst, const void *src); //!< Указатель на функцию, которая копирует нужным образом элемент в список (возможно, с выделение памяти, например, под строки)
 	void (*cmp)(const void *arg1, const void *arg2); //!< Указатель на функцию сравнения двух элементов
 	void (*free)(void *data); //!< Указатель на функцию для освобождения памяти, выделенной функцией cmp
-} List;
+} List_; //Нижнее подчеркивание нужно, чтобы корректно работало объявление List () list = ...
 
 //init-destroy functions
-List *_newCustomList(size_t dataSize, void (*cpyFunc)(void *dst, const void *src), void (*cmpFunc)(const void *arg1, const void *arg2), void (*freeFunc)(void *data) );
-void _listDestroy(List *list);
+List_ *_newCustomList(size_t dataSize, void (*cpyFunc)(void *dst, const void *src), void (*cmpFunc)(const void *arg1, const void *arg2), void (*freeFunc)(void *data) );
+void _listDestroy(List_ *list);
 
 //interface functions
-void _listPushFront(List *list, void *data);
-void _listPopFront(List *list);
-void *_listFront(List *list);
-void _listWalk(List *list, void (*cb)(void *data));
-void _listClear(List *list);
-void _listReverse(List *list);
-int _listEmpty(List *list);
+void _listPushFront(List_ *list, void *data);
+void _listPopFront(List_ *list);
+void *_listFront(List_ *list);
+void _listWalk(List_ *list, void (*cb)(void *data));
+void _listClear(List_ *list);
+void _listReverse(List_ *list);
+int _listEmpty(List_ *list);
 
 #endif

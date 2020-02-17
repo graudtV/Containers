@@ -21,8 +21,8 @@ void printStr(void *ppstr)
 
 int main()
 {
-	List *list = newCustomList(char *, cpyStr, NULL, freeStr);
-	printf("List size = %zu\n", sizeof(List));
+	List_ *list = newCustomList(char *, cpyStr, NULL, freeStr);
+	printf("List size = %zu\n", sizeof(List_));
 	listPushFront(list, "abc\n");
 	listPushFront(list, "Hello, world!\n");
 	listPushFront(list, "Have a nice day!\n");

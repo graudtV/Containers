@@ -3,13 +3,9 @@
 
 #include "List_generic.h" //для struct List
 
-typedef struct
-{
-	List glist; //generic list
-} ListInt;
+typedef struct {} List_int;
 
-ListInt *_newIntList();
+List_int *_newList_int();
 
-void _listIntDestroy(ListInt *list);
 
 #endif // _LISTINT_H_

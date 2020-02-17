@@ -6,7 +6,6 @@
 static void cpy_int(void *dst, const void *src)
 {
 	*((int *) dst) = *((int *) src);
-	printf("cpyInt\n");
 }
 
 static int cmp_int(const void *arg1, const void *arg2)

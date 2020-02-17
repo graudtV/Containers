@@ -12,7 +12,7 @@ void cpyChar(void *dst, const void *src)
 
 int main()
 {
-	List *list = newCustomList(char, cpyChar, NULL, NULL);
+	List (generic) *list = newCustomList(char, cpyChar, NULL, NULL);
 	
 	char str[] = "Hello, world!!!";
 	for (int i = 0; str[i]; ++i)

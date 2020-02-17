@@ -2,21 +2,24 @@
 #include <stdlib.h>
 #include <assert.h>
 
-List *_newCustomList(size_t dataSize, void (*cpyFunc)(void *dst, const void *src),
-					void (*cmpFunc)(const void *arg1, const void *arg2), void (*freeFunc)(void *data) )
+List_ *_newCustomList(size_t dataSize, void (*cpyFunc)(void *dst, const void *src),
+					int (*cmpFunc)(const void *arg1, const void *arg2), void (*freeFunc)(void *data) )
 {
 	assert(cpyFunc != NULL);	
-	List *list = calloc(1, sizeof(List));
+	List_ *list = calloc(1, sizeof(List_));
 	assert(list != NULL);
+	//printf("New list %p size %zu\n", list, sizeof(List_));
 	//Инициализация значениями
 	list->head = NULL;
 	list->data_sz = dataSize;
 	list->cpy = cpyFunc;
+	list->cmp = cmpFunc;
+	list->free = freeFunc;
 
 	return list;
 }
 
-void _listDestroy(List *list)
+void _listDestroy(List_ *list)
 {
 	_listClear(list);
 
@@ -26,16 +29,19 @@ void _listDestroy(List *list)
 	list->free = NULL;
 
 	free(list); //!!!
+	//printf("Freing list %p\n", list);
 }
 
 
 
-void _listPushFront(List *list, void *data)
+void _listPushFront(List_ *list, void *data)
 {
 	assert(list != NULL);
 	assert(data != NULL);
+	assert(list->cpy != NULL);
 
 	void *node = calloc(1, sizeof(void *) + list->data_sz);
+	//printf("New node %p size %zu\n", node, sizeof(void *) + list->data_sz);
 	assert(node != NULL);
 	//Инициализация нового элемента списка ("узла")
 	*((void **) node) = list->head; //в поле next новой головы записываем указатель на старую
@@ -44,7 +50,7 @@ void _listPushFront(List *list, void *data)
 	list->head = node;
 }
 
-void _listPopFront(List *list)
+void _listPopFront(List_ *list)
 {
 	assert(list->head != NULL); //Список не должен быть пустым
 	if (list->head == NULL) //На случай режима release, если assert не сработает
@@ -54,18 +60,18 @@ void _listPopFront(List *list)
 	if (list->free != NULL) //Если пользователь задал функцию free, вызываем ее
 		list->free(list->head + sizeof(void *));
 	free(list->head);
-
+	////printf("freeing node %p\n", list->head);
 	list->head = newHead;
 }
 
-void *_listFront(List *list)
+void *_listFront(List_ *list)
 {
 	if (!list->head) //list is empty
 		return NULL;
 	return list->head + sizeof(void *);
 }
 
-void _listWalk(List *list, void (*cb)(void *data))
+void _listWalk(List_ *list, void (*cb)(void *data))
 {
 	assert(cb != NULL);
 	void *node = list->head;
@@ -76,7 +82,7 @@ void _listWalk(List *list, void (*cb)(void *data))
 	}
 }
 
-void _listClear(List *list)
+void _listClear(List_ *list)
 {
 	void *node = list->head;
 	void *tempNode = NULL;
@@ -86,12 +92,13 @@ void _listClear(List *list)
 		if (list->free != NULL) //Если пользователь задал функцию free, вызываем ее
 			list->free(node + sizeof(void *)); //Освобождаем память, выделенную функцией list->cpy
 		free(node); //Освобождаем память под сам узел
+		//printf("freeing node %p (_listClear)\n", node);
 		node = tempNode;
 	}
 	list->head = NULL;	
 }
 
-void _listReverse(List *list)
+void _listReverse(List_ *list)
 {
 	void *curNode = list->head; //Последний узел с провязанной в обратную сторону связью
 	if (curNode == NULL)
@@ -109,7 +116,7 @@ void _listReverse(List *list)
 	list->head = curNode; //Последний элемент последнего списка - новая голова
 }
 
-int _listEmpty(List *list)
+int _listEmpty(List_ *list)
 {
 	return (list->head) ? 0 : 1;
 }

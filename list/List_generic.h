@@ -13,12 +13,12 @@ typedef struct
 	void *head; //!< Указатель на первый элемент списка
 	size_t data_sz; //!< Размер типа данных, записываемых в список
 	void (*cpy)(void *dst, const void *src); //!< Указатель на функцию, которая копирует нужным образом элемент в список (возможно, с выделение памяти, например, под строки)
-	void (*cmp)(const void *arg1, const void *arg2); //!< Указатель на функцию сравнения двух элементов
+	int (*cmp)(const void *arg1, const void *arg2); //!< Указатель на функцию сравнения двух элементов
 	void (*free)(void *data); //!< Указатель на функцию для освобождения памяти, выделенной функцией cmp
 } List_; //Нижнее подчеркивание нужно, чтобы корректно работало объявление List () list = ...
 
 //init-destroy functions
-List_ *_newCustomList(size_t dataSize, void (*cpyFunc)(void *dst, const void *src), void (*cmpFunc)(const void *arg1, const void *arg2), void (*freeFunc)(void *data) );
+List_ *_newCustomList(size_t dataSize, void (*cpyFunc)(void *dst, const void *src), int (*cmpFunc)(const void *arg1, const void *arg2), void (*freeFunc)(void *data) );
 void _listDestroy(List_ *list);
 
 //interface functions

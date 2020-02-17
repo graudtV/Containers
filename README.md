@@ -3,7 +3,7 @@
 
 ## List
 ### Пример использования
-```
+```C
 List (int) *list = newList(int);
 
 listPushFront(list, 10); //putting a value in the list

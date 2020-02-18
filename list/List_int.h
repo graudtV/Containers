@@ -7,6 +7,7 @@ typedef struct {} List_int;
 
 List_int *_newList_int();
 void _listPushFront_int(List_int *list, int val);
+int _listPopFront_int(List_int *list);
 
 
 #endif // _LISTINT_H_

@@ -20,13 +20,19 @@ typedef struct
 //init-destroy functions
 #define newCustomList(type, cpyF, cmpF, freeF) _newCustomList(sizeof(type), cpyF, cmpF, freeF); //"Конструктор" для GList
 GList *_newCustomList(size_t dataSize, void (*cpyFunc)(void *dst, const void *src), int (*cmpFunc)(const void *arg1, const void *arg2), void (*freeFunc)(void *data) );
-void glistDestroy(GList *list);
+void glistDestroy(GList *list); //nust be called for any glist!
 
 //interface functions
-void glistPushFront(GList *list, void *data);
+void glistAssign(GList *list, size_t count, const void *value); //удаляет содержимое, вставлять count штук элементов value
+	//front element access
+void glistPushFront(GList *list, const void *data);
 void glistPopFront(GList *list);
 void *glistFront(GList *list); //ptr on data of the front element
-void *glistFind(GList *list, void *data);
+	//iterator access to an element
+void glistInsertAfter(GList *list, void *itPos, void *value);
+void glistEraseAfter(GList *list, void *itPos);
+	//other
+void glistResize(GList *list, size_t newSize, void *defaultValue); //если newSize меньше размера списка, то удаляет лишнее. Если больше - создает новые элементы с defaultValue
 void glistClear(GList *list);
 int glistEmpty(GList *list);
 	//iteration

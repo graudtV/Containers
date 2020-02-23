@@ -29,11 +29,6 @@ int _listPopFront_int(List_int *list)
 	return return_value;
 }
 
-int *_listFind_int(List_int *list, int val)
-{
-	return (int *) glistFind((GList *) list, &val);
-}
-
 void _listSpliceAfter_int(int *itPos, List_int *otherList)
 {
 	glistSpliceAfter((void *) itPos, (GList *) otherList);

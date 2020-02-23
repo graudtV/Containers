@@ -20,8 +20,6 @@
 #define listPushFront(plist, pdata) _Generic((plist), GList *: glistPushFront, List_int *: _listPushFront_int, List_char *: _listPushFront_char)(plist, pdata)
 #define listPopFront(plist) _Generic((plist), GList *: glistPopFront, List_int *: _listPopFront_int, List_char *: _listPopFront_char)(plist)
 #define listFront(plist) _Generic((plist), GList *: glistFront((GList *) plist), List_int *: *(int *) glistFront((GList *) plist), List_char *: *(char *) glistFront((GList *) plist)) //Возвращает первый элемент
-//#define listFindPtr(plist, pdata) _Generic((plist), GList *: glistFind, List_int *: _listFind_int, List_char *: _listFind_char)(plist, pdata) //returns a ptr on an element - позволяет проверить, что такой элемент есть
-//#define listFind(plist, pdata) _Generic(listFindPtr(plist, pdata), void *: listFindPtr(plist, pdata), int *: *listFindPtr(plist, pdata))
 #define listClear(plist) _Generic((plist), GList *: glistClear, List_int *: glistClear, List_char *: glistClear)((GList *) plist)
 #define listEmpty(plist) _Generic((plist), GList *: glistEmpty, List_int *: glistEmpty, List_char *: glistEmpty)((GList *) plist)
 	//iteration

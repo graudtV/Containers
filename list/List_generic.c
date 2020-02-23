@@ -22,7 +22,7 @@ GList *_newCustomList(size_t dataSize, void (*cpyFunc)(void *dst, const void *sr
 void glistDestroy(GList *list)
 {
 	assert(list != NULL);
-	assert(list->cmp != NULL && "list has been already destroyed or not initialised");
+	assert(list->cpy != NULL && "list has been already destroyed or not initialised");
 	glistClear(list);
 
 	list->data_sz = 0;
@@ -34,9 +34,17 @@ void glistDestroy(GList *list)
 	//printf("Freing list %p\n", list);
 }
 
+void glistAssign(GList *list, size_t count, const void *value)
+{
+	assert(list != NULL);
+	assert(list->cpy != NULL);
+	assert(value != NULL);
+	glistClear(list);
+	while (count--)
+		glistPushFront(list, value);	
+}
 
-
-void glistPushFront(GList *list, void *data)
+void glistPushFront(GList *list, const void *data)
 {
 	assert(list != NULL);
 	assert(data != NULL);
@@ -55,6 +63,7 @@ void glistPushFront(GList *list, void *data)
 void glistPopFront(GList *list)
 {
 	assert(list != NULL);
+	assert(list->cpy != NULL);
 	assert(list->head != NULL); //Список не должен быть пустым
 	if (list->head == NULL) //На случай режима release, если assert не сработает
 		return;
@@ -67,45 +76,93 @@ void glistPopFront(GList *list)
 	list->head = newHead;
 }
 
+void glistInsertAfter(GList *list, void *itPos, void *value)
+{
+	assert(list != NULL);
+	assert(list->cpy != NULL);
+	assert(itPos != NULL);
+	assert(value != NULL);
+
+	void *node = calloc(1, sizeof(void *) + list->data_sz); //выделяем память под новый узел
+	assert(node != NULL);
+	list->cpy(node + sizeof(void *), value);
+	//Вставляем новый узел в список, изменяя связи
+	*(void **) node = *(void **)(itPos - sizeof(void *)); //в node записываем указатель на продолжение списка
+	*(void **)(itPos - sizeof(void *)) = node; //в созданный "разрыв" записываем указатель на node
+}
+
+void glistEraseAfter(GList *list, void *itPos)
+{
+	assert(list != NULL);
+	assert(list->cpy != NULL);
+	assert(itPos != NULL);
+
+	void *node = *(void **) (itPos - sizeof(void *)); //Запоминаем указатель на удаляемый узел
+	*(void **) (itPos - sizeof(void *)) = *(void **) node; //"Выбрасываем" удаляемый узел из списка
+	//освобождаем память
+	if (list->free)
+		list->free(node + sizeof(void *));
+	free(node);
+}
+
 void *glistFront(GList *list)
 {
 	assert(list != NULL);
+	assert(list->cpy != NULL);
 
 	if (!list->head) //list is empty
 		return NULL;
 	return list->head + sizeof(void *);
 }
 
-void *glistFind(GList *list, void *data)
+void glistResize(GList *list, size_t newSize, void *defaultValue)
 {
 	assert(list != NULL);
-	assert(data != NULL);
-
-	void *node = list->head;
-	while (node)
+	assert(list->cpy != NULL);
+	void **pnode = &list->head;
+	while (newSize--)
 	{
-		if ( ! list->cmp(node + sizeof(void *), data) )
-			return (node + sizeof(void *));
-		node = *(void **) node; //переходим к следующему элементу списка
+		if (!*pnode) //больше узлов нет
+		{
+		 	void *newNode = calloc(1, sizeof(void *) + list->data_sz);
+		 	assert(newNode != NULL);
+		 	list->cpy(newNode + sizeof(void *), defaultValue);
+		 	*pnode = newNode; //добавляем созданный узел в конец(!) списка (вместо NULL)
+		 	*(void **) newNode = NULL; //в новый узел записываем указатель на следующий, т.е. NULL, т.к. больше элементов нет. В принципе, это избыточно, т.к. calloc уже записал нули
+		}
+		pnode = *pnode; //переходим к следующему узлу
 	}
-	return NULL; //not found
+	if (!*pnode) //список закончился раньше (newSize больше либо равен размеру списка)
+		return;
+	//если newSize оказался меньше размера списка
+	*pnode = NULL; //указываем, что элементов в списке после данного больше нет
+	//освобождаем память
+	void *curNode = *pnode; //переменная для перебора узлов
+	while (curNode) //пока не дошли до конца списка
+	{
+		void *nextNode = *(void **) curNode; //запоминаем следующий узел
+		if (list->free)
+			list->free(curNode + sizeof(void *));
+		free(curNode);
+		curNode = nextNode;
+	}
 }
-
 
 void glistClear(GList *list)
 {
 	assert(list != NULL);
+	assert(list->cpy != NULL);
 
 	void *node = list->head;
-	void *tempNode = NULL;
+	void *nextNode = NULL;
 	while (node)
 	{
-		tempNode = *((void **)node); //Сохраняем заранее указатель на следующий элемент списка, пока не уничтожили текущий
+		nextNode = *((void **)node); //Сохраняем заранее указатель на следующий элемент списка, пока не уничтожили текущий
 		if (list->free != NULL) //Если пользователь задал функцию free, вызываем ее
 			list->free(node + sizeof(void *)); //Освобождаем память, выделенную функцией list->cpy
 		free(node); //Освобождаем память под сам узел
 		//printf("freeing node %p (_listClear)\n", node);
-		node = tempNode;
+		node = nextNode;
 	}
 	list->head = NULL;	
 }
@@ -128,6 +185,7 @@ void *glistItNext(void **pIt)
 void glistUnique(GList *list)
 {
 	assert(list != NULL);
+	assert(list->cpy != NULL);
 	assert(list->cmp != NULL);
 	void *prevNode = list->head;
 	if (prevNode == NULL) //if there is less than 2 nodes
@@ -153,6 +211,7 @@ void glistUnique(GList *list)
 void glistReverse(GList *list)
 {
 	assert(list != NULL);
+	assert(list->cpy != NULL);
 
 	void *curNode = list->head; //Последний узел с провязанной в обратную сторону связью
 	if (curNode == NULL)

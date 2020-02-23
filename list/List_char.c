@@ -28,3 +28,13 @@ char _listPopFront_char(List_char *list)
 	glistPopFront((GList *) list);
 	return return_value;
 }
+
+int *_listFind_char(List_char *list, char val)
+{
+	return (int *) glistFind((GList *) list, &val);
+}
+
+void _listSpliceAfter_char(char *itPos, List_char *otherList)
+{
+	glistSpliceAfter((void *) itPos, (GList *) otherList);
+}

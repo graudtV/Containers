@@ -19,7 +19,7 @@ List_int *_newList_int()
 
 void _listPushFront_int(List_int *list, int val)
 {
-	glistPushFront((GList *) list, &val);
+	glistPushFront((GList *) list, &val); //благодаря функции создана локальная переменная val, её адрес и можем передать
 }
 
 int _listPopFront_int(List_int *list)
@@ -27,4 +27,14 @@ int _listPopFront_int(List_int *list)
 	int return_value = *(int *) glistFront((GList *) list);
 	glistPopFront((GList *) list);
 	return return_value;
+}
+
+int *_listFind_int(List_int *list, int val)
+{
+	return (int *) glistFind((GList *) list, &val);
+}
+
+void _listSpliceAfter_int(int *itPos, List_int *otherList)
+{
+	glistSpliceAfter((void *) itPos, (GList *) otherList);
 }

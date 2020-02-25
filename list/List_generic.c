@@ -115,10 +115,34 @@ void *glistFront(GList *list)
 	return list->head + sizeof(void *);
 }
 
+void glistRemove(GList *list, void *value)
+{
+	assert(list != NULL);
+	assert(value != NULL);
+	void **pnode = &list->head; //*pnode - текущий расматриваемый элемент. pnode - адрес, где записан указатель на этот элемент
+	while (*pnode)
+	{
+		if ( list->cmp(*pnode + sizeof(void *), value) )
+		{	//элемент НЕ совпал с value
+			pnode = *pnode; //переходим к следующему узлу
+			continue;
+		}
+		//Если данный элемент нужно удалить
+		void *nextNode = *(void **) (*pnode); //Запоминаем указатель на следующий элемент
+		if (list->free)
+			list->free(*pnode + sizeof(void *));
+		free(*pnode);
+		*pnode = nextNode; //Записываем запомненный указатель
+		continue;
+		
+	}
+}
+
 void glistResize(GList *list, size_t newSize, void *defaultValue)
 {
 	assert(list != NULL);
 	assert(list->cpy != NULL);
+	assert(defaultValue != NULL);
 	void **pnode = &list->head;
 	while (newSize--)
 	{
@@ -148,16 +172,33 @@ void glistResize(GList *list, size_t newSize, void *defaultValue)
 	}
 }
 
+void glistSwap(GList *list1, GList *list2) //swaps content and cmpFuncs. Other fields must be the same for both lists. No elements copied
+{
+	assert(list1 != NULL);
+	assert(list2 != NULL);
+
+	assert(list1->data_sz == list2->data_sz);
+	assert(list1->cpy == list2->cpy);
+	assert(list1->free == list2->free); //list->free may be NULL
+
+	int (*cmpTemp)(const void *arg1, const void *arg2) = list1->cmp;
+	list1->cmp = list2->cmp;
+	list2->cmp = cmpTemp;
+
+	void *headTemp = list1->head;
+	list1->head = list2->head;
+	list2->head = headTemp;
+}
+
 void glistClear(GList *list)
 {
 	assert(list != NULL);
 	assert(list->cpy != NULL);
 
 	void *node = list->head;
-	void *nextNode = NULL;
 	while (node)
 	{
-		nextNode = *((void **)node); //Сохраняем заранее указатель на следующий элемент списка, пока не уничтожили текущий
+		void *nextNode = *((void **)node); //Сохраняем заранее указатель на следующий элемент списка, пока не уничтожили текущий
 		if (list->free != NULL) //Если пользователь задал функцию free, вызываем ее
 			list->free(node + sizeof(void *)); //Освобождаем память, выделенную функцией list->cpy
 		free(node); //Освобождаем память под сам узел

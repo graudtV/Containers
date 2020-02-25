@@ -32,7 +32,9 @@ void *glistFront(GList *list); //ptr on data of the front element
 void glistInsertAfter(GList *list, void *itPos, void *value);
 void glistEraseAfter(GList *list, void *itPos);
 	//other
+void glistRemove(GList *list, void *value); //removes all(!) such values
 void glistResize(GList *list, size_t newSize, void *defaultValue); //если newSize меньше размера списка, то удаляет лишнее. Если больше - создает новые элементы с defaultValue
+void glistSwap(GList *list1, GList *list2);
 void glistClear(GList *list);
 int glistEmpty(GList *list);
 	//iteration

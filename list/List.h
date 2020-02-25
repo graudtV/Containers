@@ -5,6 +5,9 @@
 #ifndef _LIST_H_
 #define _LIST_H_
 
+// uncomment to disable assert() in all Lists
+// #define NDEBUG
+
 #include "List_generic.h"
 #include "List_int.h"
 #include "List_char.h"

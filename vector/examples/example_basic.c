@@ -29,12 +29,9 @@ void print_int_vector_by_range(const int *fst, const int *last)
 	printf("\n");
 }
 
-struct s { cvector_of(int) v; };
-
 int main()
 {
 	cvector_of(int) numbers = cvec_create(); // creates empty vector
-	cvector_of(int) vals = NULL;
 
 	fill_with_conseq_numbers(numbers, 10, 0);
 	print_int_vector(numbers); // 0 1 2 3 4 5 6 7 8 9

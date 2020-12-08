@@ -133,9 +133,32 @@ void glistRemove(GList *list, void *value)
 			list->free(*pnode + sizeof(void *));
 		free(*pnode);
 		*pnode = nextNode; //Записываем запомненный указатель
-		continue;
-		
+		continue;	
 	}
+}
+
+void glistRemoveIf(GList *list, int (*criterionFunc) (const void *value))
+{
+	assert(list != NULL);
+	assert(criterionFunc != NULL);
+	//copied from glistRemove() this small changes
+	void **pnode = &list->head; //*pnode - текущий расматриваемый элемент. pnode - адрес, где записан указатель на этот элемент
+	while (*pnode)
+	{
+		//if ( list->cmp(*pnode + sizeof(void *), value) )
+		if ( ! criterionFunc(*pnode + sizeof(void *)) )
+		{	//элемент НЕ совпал с value
+			pnode = *pnode; //переходим к следующему узлу
+			continue;
+		}
+		//Если данный элемент нужно удалить
+		void *nextNode = *(void **) (*pnode); //Запоминаем указатель на следующий элемент
+		if (list->free)
+			list->free(*pnode + sizeof(void *));
+		free(*pnode);
+		*pnode = nextNode; //Записываем запомненный указатель
+		continue;	
+	}	
 }
 
 void glistResize(GList *list, size_t newSize, void *defaultValue)
@@ -221,6 +244,41 @@ void *glistItNext(void **pIt)
 	if (!*pIt) //ptr on the next node is NULL
 		return NULL;
 	return (*pIt += sizeof(void *)); //moving *pIt on start of data (находится через sizeof(void *) байт после начала узла)
+}
+
+void glistMerge(GList *list1, GList *list2)
+{
+	assert(list1 != NULL);
+	assert(list2 != NULL);
+	assert(list1->cpy != NULL);
+	assert(list2->cpy != NULL);
+	assert(list1->cmp != NULL);
+	assert(list1->cmp == list2->cmp);
+	if (list1 == list2)
+		return;
+
+	void *node1 = list1->head; //для перебора узлов списка 1
+	void *node2 = list2->head; //для перебора узлов списка 1
+	void **pnode = &list1->head; //указатель на последний записанный элемент
+	while (node1 || node2) //пока не дойдем до конца в обоих списках
+	{
+		printf("node 1 = %p; val = %d\n", node1, *(int *)(node1 + sizeof(void *)));
+		printf("node 2 = %p; val = %d\n", node2, *(int *)(node2 + sizeof(void *)));
+		if ( node2 == NULL || ( node1 != NULL && list1->cmp(node1 + sizeof(void *), node2 + sizeof(void *)) < 0 ) ) //node1 < node2
+		{
+			//printf("cmp func res = %d\n", list1->cmp(node1 + sizeof(void *), node2 + sizeof(void *)));
+			*pnode = node1; //приписываем к формируемому списку
+			pnode = &node1;
+			node1 = *(void **) node1;
+		}
+		else //node2 < node1
+		{
+			*pnode = node2;
+			pnode = &node2;
+			node2 = *(void **) node2;
+		}
+	}
+	list2->head = NULL;
 }
 
 void glistUnique(GList *list)

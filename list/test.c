@@ -21,7 +21,7 @@ void printStr(void *ppstr)
 
 int main()
 {
-	List *list = newCustomList(char *, cpyStr, NULL, freeStr);
+	List (custom) *list = newCustomList(char *, cpyStr, NULL, freeStr);
 	for (int j = 0; j < 1; ++j)
 	{
 		for (int i = 0; i < 10000000; ++i)

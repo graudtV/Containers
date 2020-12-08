@@ -33,6 +33,7 @@ void glistInsertAfter(GList *list, void *itPos, void *value);
 void glistEraseAfter(GList *list, void *itPos);
 	//other
 void glistRemove(GList *list, void *value); //removes all(!) such values
+void glistRemoveIf(GList *list, int (*criterionFunc) (const void *value)); //criterionFunc returns true if element must be deleted
 void glistResize(GList *list, size_t newSize, void *defaultValue); //если newSize меньше размера списка, то удаляет лишнее. Если больше - создает новые элементы с defaultValue
 void glistSwap(GList *list1, GList *list2);
 void glistClear(GList *list);
@@ -42,6 +43,7 @@ int glistEmpty(GList *list);
 void *glistItNext(void **pIt); // analog for "it++" in C++. Gets ptr on the iterator. "end" in C++ is equal to NULL here
 
 	//operations
+void glistMerge(GList *list1, GList *list2); //merges two sorted lists
 void glistUnique(GList *list); //Removes all consecutive duplicate elements from the list
 void glistReverse(GList *list);
 void glistSpliceAfter(void *itPos, GList *otherList); //inserts elements from otherList after an element in some list. The element is pointed by itPos. No elements copied. If lists have different types the behaviour is undefined.
